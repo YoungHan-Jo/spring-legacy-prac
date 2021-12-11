@@ -99,9 +99,6 @@
 			<artifactId>jbcrypt</artifactId>
 			<version>0.4</version>
 		</dependency>
-
-
-
 		<!-- AspectJ -->
 		<dependency>
 			<groupId>org.aspectj</groupId>

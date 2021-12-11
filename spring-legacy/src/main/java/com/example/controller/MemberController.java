@@ -2,6 +2,10 @@ package com.example.controller;
 
 import java.util.Date;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,86 +34,119 @@ public class MemberController {
 	public String loginForm() {
 		System.out.println("loginForm() 호출됨...");
 		return "member/login";
-	}
+	} // loginForm
 
 	@PostMapping("/login")
-	public ResponseEntity<String> login(String id, String passwd) {
-		// 1. 아이디 존재 여부 체크
-		MemberVO dbMemberVO = memberService.getMemberById(id);
+	public ResponseEntity<String> login(String id, String passwd, 
+			boolean rememberMe,
+			HttpServletResponse response,
+			HttpSession session) {
+		System.out.println("id : " + id);
+		System.out.println("passwd : " + passwd);
+		System.out.println("rememberMe : " + rememberMe);
 
-		if (dbMemberVO == null) { // 아이디가 존재하지 않을 경우
+		// 1. id 존재여부
+		MemberVO dbMemberVO = memberService.getMemberById(id);
+		if (dbMemberVO == null) { // 존재하지 않는 아이디
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Content-Type", "text/html; charset=UTF-8");
-			String str = JScript.back("존재하지 않는 아이디 입니다.");
+
+			String str = JScript.back("아이디가 존재하지 않습니다.");
 
 			return new ResponseEntity<String>(str, headers, HttpStatus.OK);
 		}
+
 		// 2. 비밀번호 체크
-		String realHashPasswd = dbMemberVO.getPasswd();
-		
-		Boolean isRightPasswd = BCrypt.checkpw(passwd, realHashPasswd);
+		Boolean isPasswdRight = BCrypt.checkpw(passwd, dbMemberVO.getPasswd());
 
-		// 3. 세션 등록
+		if (isPasswdRight == false) { // 비밀번호가 틀림
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", "text/html; charset=UTF-8");
 
-		// 4. 쿠키 등록
+			String str = JScript.back("비밀번호가 틀렸습니다.");
 
-		// 5. 메인화면을 보내기
+			return new ResponseEntity<String>(str, headers, HttpStatus.OK);
+		}
 
-		return null;
+		// 3. 로그인 유지 체크했는지
+		if (rememberMe == true) { // 로그인 유지에 체크 했을 때
+			// 쿠키등록하기
+			Cookie cookie = new Cookie("userId", id);
+			cookie.setMaxAge(60 * 60 * 24 * 7); // 쿠키 수명 설정 초단위
+			cookie.setPath("/"); // 모든경로에 적용
+
+			response.addCookie(cookie);
+
+		}
+		// 4. 세션 등록
+		session.setAttribute("id", id);
+
+		// 5. 로그인 성공 메세지 띄우고, 메인화면으로 이동
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Type", "text/html; charset=UTF-8");
+
+		String str = JScript.href("로그인 성공", "/");
+
+		return new ResponseEntity<String>(str, headers, HttpStatus.OK);
 	}
 
 	@GetMapping("/join")
 	public String joinForm() {
 		System.out.println("joinForm() 호출됨...");
 		return "member/join";
-	}
+	} // joinForm
 
 	@PostMapping("/join")
 	public ResponseEntity<String> join(MemberVO memberVO, String passwdConfirm) {
-		// 1.아이디 중복 체크
+
+		// 1. 아이디 중복체크(DB에 있는지 확인)
 		String id = memberVO.getId();
 
 		MemberVO dbMemberVO = memberService.getMemberById(id);
+		System.out.println("dbMemberVO : " + dbMemberVO);
 
-		if (dbMemberVO != null) { // 중복된 아이디가 있음
+		if (dbMemberVO != null) { // 이미존재하는 아이디
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Content-Type", "text/html; charset=UTF-8");
-			String str = JScript.back("중복된 아이디가 있습니다.");
+
+			String str = JScript.back("이미 존재하는 아이디입니다.");
 
 			return new ResponseEntity<String>(str, headers, HttpStatus.OK);
 		}
-
-		// 2.비밀번호 확인 맞는지 체크
+		// 2. 비밀번호, 비밀번호 확인 서로 같은지 체크
 		String passwd = memberVO.getPasswd();
 
-		if (passwd.equals(passwdConfirm) == false) { // 비밀번호와 비밀번호 확인이 서로 일치하지 않음
+		// 비밀번호가 서로 다를때
+		if (passwd.equals(passwdConfirm) == false) {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Content-Type", "text/html; charset=UTF-8");
-			String str = JScript.back("비밀번호가 서로 일치하지 않습니다.");
+
+			String str = JScript.back("비밀번호가 서로 다릅니다.");
 
 			return new ResponseEntity<String>(str, headers, HttpStatus.OK);
 		}
-		System.out.println("memberVO : " + memberVO);
 
-		// 회원 가입 날짜
+		// 아이디체크. 비밀번호체크 모두 통과했을때
+		System.out.println("수정 전 memberVO : " + memberVO);
+		// 회원가입 날짜 설정하기
 		memberVO.setRegDate(new Date());
 
-		// 비밀번호 암호화
+		// 비밀번호 암호화하기
 		String hashPasswd = BCrypt.hashpw(passwd, BCrypt.gensalt());
-
 		memberVO.setPasswd(hashPasswd);
 
 		System.out.println("수정 후 memberVO : " + memberVO);
 
-		// 3. DB에 회원 정보 등록하기(가입하기)
+		// 3. DB에 등록
 		memberService.insertMember(memberVO);
 
-		// 4. 회원가입 완료 메세지 + 로그인 페이지로 보내기
+		// 4. 회원가입완료 메세지를 띄우고, 로그인화면으로 이동
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Content-Type", "text/html; charset=UTF-8");
+
 		String str = JScript.href("회원가입 완료", "/member/login");
 
 		return new ResponseEntity<String>(str, headers, HttpStatus.OK);
-	}
+	} // join
 
 }

@@ -9,19 +9,20 @@
 		<![CDATA[
 			SELECT *
 			FROM member
-			WHERE id = #{id}
+			WHERE id = #{id};
 		]]>
 	</select>
 	
 	<!-- ===========insert============== -->
 	<insert id="insertMember">
 		<![CDATA[
-			INSERT INTO member(id, passwd, name, birthday, gender,
-							email, recv_email, reg_date)
-			VALUES (#{id}, #{passwd}, #{name}, #{birthday}, #{gender},
-							#{email}, #{recvEmail}, #{regDate})
+			INSERT INTO member(id, passwd, name, birthday,
+					gender, email, recv_email, reg_date)
+			VALUES (#{id}, #{passwd}, #{name}, #{birthday},
+				#{gender}, #{email}, #{recvEmail}, #{regDate})
 		]]>
 	</insert>
+
 	
 	<!-- ===========update============== -->
 	
