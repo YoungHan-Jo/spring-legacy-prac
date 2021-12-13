@@ -3,6 +3,7 @@ package com.example.controller;
 import java.util.Date;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -11,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,9 +39,7 @@ public class MemberController {
 	} // loginForm
 
 	@PostMapping("/login")
-	public ResponseEntity<String> login(String id, String passwd, 
-			boolean rememberMe,
-			HttpServletResponse response,
+	public ResponseEntity<String> login(String id, String passwd, boolean rememberMe, HttpServletResponse response,
 			HttpSession session) {
 		System.out.println("id : " + id);
 		System.out.println("passwd : " + passwd);
@@ -148,5 +148,169 @@ public class MemberController {
 
 		return new ResponseEntity<String>(str, headers, HttpStatus.OK);
 	} // join
+
+	@GetMapping("/logout")
+	public String logout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+		// 세션 비우기
+		session.invalidate();
+
+		// 쿠키 수명 0으로 만들어서 보내기
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals("userId")) {
+					cookie.setMaxAge(0);
+					cookie.setPath("/");
+					response.addCookie(cookie);
+				}
+			}
+		}
+
+		return "index";
+	}
+
+	@GetMapping("/myInfo")
+	public String myInfo(HttpSession session, Model model) {
+
+		String id = (String) session.getAttribute("id");
+
+		MemberVO memberVO = memberService.getMemberById(id);
+
+		model.addAttribute("member", memberVO);
+
+		return "member/myInfo";
+	}
+
+	@GetMapping("/modify")
+	public String modifyForm(HttpSession session, Model model) {
+
+		String id = (String) session.getAttribute("id");
+
+		MemberVO memberVO = memberService.getMemberById(id);
+
+		model.addAttribute("member", memberVO);
+
+		return "member/memberModify";
+	}
+
+	@PostMapping("/modify")
+	public ResponseEntity<String> modify(MemberVO memberVO, HttpSession session) {
+
+		String id = (String) session.getAttribute("id");
+
+		System.out.println("memberVO : " + memberVO);
+		memberVO.setId(id);
+		System.out.println("수정 후 memberVO : " + memberVO);
+
+		// 1. 비밀번호 맞는지 체크
+		MemberVO dbMemberVO = memberService.getMemberById(id);
+
+		boolean isPasswdRight = BCrypt.checkpw(memberVO.getPasswd(), dbMemberVO.getPasswd());
+
+		if (isPasswdRight == false) { // 비밀번호 틀림
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", "text/html; charset=UTF-8");
+
+			String str = JScript.back("비밀번호가 틀렸습니다.");
+
+			return new ResponseEntity<String>(str, headers, HttpStatus.OK);
+		}
+
+		// 2. DB 정보 수정하기
+		memberService.modifyMember(memberVO);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Type", "text/html; charset=UTF-8");
+
+		String str = JScript.href("회원정보 수정 완료", "/member/myInfo");
+
+		return new ResponseEntity<String>(str, headers, HttpStatus.OK);
+	}
+
+	@GetMapping("/passwd")
+	public String passwdForm() {
+
+		return "member/passwd";
+	}
+
+	@PostMapping("/passwd")
+	public ResponseEntity<String> passwd(String passwd, String newPasswd, String newPasswdConfirm,
+			HttpSession session) {
+
+		// 1. 현재 비밀번호 맞는지 체크
+		String id = (String) session.getAttribute("id");
+		MemberVO dbMemberVO = memberService.getMemberById(id);
+
+		boolean isPasswdRight = BCrypt.checkpw(passwd, dbMemberVO.getPasswd());
+
+		if (isPasswdRight == false) { // 현재 비밀번호 일치하지 않음
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", "text/html; charset=UTF-8");
+
+			String str = JScript.back("현재 비밀번호가 틀렸습니다.");
+
+			return new ResponseEntity<String>(str, headers, HttpStatus.OK);
+		}
+
+		// 2. 새 비밀번호, 새 비밀번호 확인 맞는지 체크
+		if (newPasswd.equals(newPasswdConfirm) == false) { // 새비밀번호, 새비밀번호 확인이 서로 다름
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", "text/html; charset=UTF-8");
+
+			String str = JScript.back("새 비밀번호와 새 비밀번호 확인이 서로 일치하지 않습니다.");
+
+			return new ResponseEntity<String>(str, headers, HttpStatus.OK);
+		}
+
+		// 3. DB 비밀번호 변경
+		// 3-1. 비밀번호 암호화
+		String hashPasswd = BCrypt.hashpw(newPasswd, BCrypt.gensalt());
+		
+		memberService.modifyPasswd(id, hashPasswd);
+
+		// 4. 비밀번호 변경 완료 메세지 띄우고 로그아웃처리
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Type", "text/html; charset=UTF-8");
+
+		String str = JScript.href("비밀번호 변경 완료", "/member/logout");
+
+		return new ResponseEntity<String>(str, headers, HttpStatus.OK);
+	}
+	
+	@GetMapping("/remove")
+	public String removeForm() {
+		
+		return "member/memberRemove";
+	}
+	
+	@PostMapping("/remove")
+	public ResponseEntity<String> remove(String passwd,
+			HttpSession session){
+		
+		// 1. 비밀번호 체크
+		String id = (String) session.getAttribute("id");
+		MemberVO dbMemberVO = memberService.getMemberById(id);
+
+		boolean isPasswdRight = BCrypt.checkpw(passwd, dbMemberVO.getPasswd());
+
+		if (isPasswdRight == false) { // 현재 비밀번호 일치하지 않음
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Content-Type", "text/html; charset=UTF-8");
+
+			String str = JScript.back("현재 비밀번호가 틀렸습니다.");
+
+			return new ResponseEntity<String>(str, headers, HttpStatus.OK);
+		}
+		// 2. DB에서 해당 아이디 정보 삭제
+		memberService.deleteMemberById(id);
+		
+		// 3. 회원탈퇴 메세지 띄우고 로그아웃 처리(세션,쿠키 삭제)
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Type", "text/html; charset=UTF-8");
+
+		String str = JScript.href("회원탈퇴완료", "/member/logout");
+
+		return new ResponseEntity<String>(str, headers, HttpStatus.OK);
+	}
 
 }

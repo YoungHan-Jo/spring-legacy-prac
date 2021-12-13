@@ -1,5 +1,7 @@
 package com.example.mapper;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.example.domain.MemberVO;
 
 public interface MemberMapper {
@@ -13,6 +15,13 @@ public interface MemberMapper {
 	void insertMember(MemberVO memberVO);
 	
 	// ============ update ==============
+	void modifyMember(MemberVO memberVO);
+	
+	void modifyPasswd(
+			@Param("id") String id, 
+			@Param("newPasswd") String newPasswd);
 	
 	// ============ delete ==============
+	void deleteMemberById(String id);
+	
 }
