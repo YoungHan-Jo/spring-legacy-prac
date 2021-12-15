@@ -11,6 +11,14 @@
 			FROM board 
 		]]>
 	</select>
+	
+	<select id="getBoardByNum" resultType="boardVO">
+		<![CDATA[
+			SELECT *
+			FROM board
+			WHERE num = #{num}
+		]]>
+	</select>
 
 	<!-- ===========insert============== -->
 	<insert id="writeBoard">
@@ -25,7 +33,13 @@
 
 	
 	<!-- ===========update============== -->
-
+	<update id="addViewCount">
+		<![CDATA[
+			UPDATE board
+			SET view_count = view_count + 1
+			WHERE num = #{num}
+		]]>
+	</update>
 	
 	<!-- ===========delete============== -->
 	

@@ -25,6 +25,13 @@ public class BoardService {
 		boardMapper.writeBoard(boardVO);
 	}
 	
+	public BoardVO getBoardByNum(int num) {
+		return boardMapper.getBoardByNum(num);
+	}
+	
+	public void addViewCount(int num) {
+		boardMapper.addViewCount(num);
+	}
 	
 	
 }
