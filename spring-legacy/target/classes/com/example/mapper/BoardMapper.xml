@@ -19,6 +19,23 @@
 			WHERE num = #{num}
 		]]>
 	</select>
+	
+	<select id="getAllBoards" resultType="boardVO">
+		<![CDATA[
+			SELECT *
+			FROM board
+			ORDER BY re_ref DESC, re_seq ASC
+		]]>
+	</select>
+	
+	<select id="getBoardsByCri" resultType="boardVO">
+		<![CDATA[
+			SELECT *
+			FROM board
+			ORDER BY re_ref DESC, re_seq ASC
+			LIMIT #{startRow}, #{amount}
+		]]>
+	</select>
 
 	<!-- ===========insert============== -->
 	<insert id="writeBoard">

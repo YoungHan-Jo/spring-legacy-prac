@@ -1,6 +1,9 @@
 package com.example.mapper;
 
+import java.util.List;
+
 import com.example.domain.BoardVO;
+import com.example.domain.Criteria;
 
 public interface BoardMapper {
 	
@@ -9,6 +12,9 @@ public interface BoardMapper {
 	
 	BoardVO getBoardByNum(int num);
 	
+	List<BoardVO> getAllBoards();
+	
+	List<BoardVO> getBoardsByCri(Criteria cri);
 	
 	
 	// ============ insert ==============

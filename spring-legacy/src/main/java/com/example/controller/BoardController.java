@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.domain.BoardVO;
+import com.example.domain.Criteria;
 import com.example.service.BoardService;
 
 @Controller
@@ -27,7 +29,14 @@ public class BoardController {
 	}
 
 	@GetMapping("/list")
-	public String boardList() {
+	public String boardList(Criteria cri, Model model) {
+		
+		System.out.println("cri : " + cri);
+		
+		List<BoardVO> boardList = boardService.getBoardsByCri(cri);
+		
+		model.addAttribute("boardList", boardList);
+		
 		return "board/boardList";
 	}
 

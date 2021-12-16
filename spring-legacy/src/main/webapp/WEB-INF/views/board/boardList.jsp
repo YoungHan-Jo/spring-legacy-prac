@@ -1,6 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +11,9 @@
 <style>
 #contact {
 	padding-top: 300px;
+}
+tr{
+	cursor: pointer;
 }
 </style>
 </head>
@@ -47,23 +53,22 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<th scope="row">1</th>
-							<td>Mark</td>
-							<td>Otto</td>
-							<td>@mdo</td>
-						</tr>
-						<tr>
-							<th scope="row">2</th>
-							<td>Jacob</td>
-							<td>Thornton</td>
-							<td>@fat</td>
-						</tr>
-						<tr>
-							<th scope="row">3</th>
-							<td colspan="2">Larry the Bird</td>
-							<td>@twitter</td>
-						</tr>
+					<c:choose>
+						<c:when test="${ fn:length(boardList) gt 0 }">
+							<c:forEach var="board" items="${ boardList }">
+							<tr onclick="location.href='/board/content?num=${board.num}'">
+								<th>${ board.num }</th>
+								<th>${ board.subject }</th>
+								<th>${ board.memberId }</th>
+								<th><fmt:formatDate value="${ board.regDate }" pattern="yyyy.MM.dd HH:mm"/></th>
+								<th>${ board.viewCount }</th>
+							</tr>
+							</c:forEach>
+						</c:when>
+						<c:otherwise>
+							<td colspan="5">게시글이 존재하지 않습니다.</td>
+						</c:otherwise>
+					</c:choose>
 					</tbody>
 				</table>
 			</div>
