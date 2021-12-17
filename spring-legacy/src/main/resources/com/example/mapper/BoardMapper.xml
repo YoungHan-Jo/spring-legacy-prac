@@ -32,9 +32,40 @@
 		<![CDATA[
 			SELECT *
 			FROM board
+		]]>
+		<where>
+			<if test="type == 'subject'.toString()">
+				subject LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="type == 'content'.toString()">
+				content LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="type == 'memberId'.toString()">
+				member_id LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+		</where>
+		<![CDATA[	
 			ORDER BY re_ref DESC, re_seq ASC
 			LIMIT #{startRow}, #{amount}
 		]]>
+	</select>
+	
+	<select id="getCountBoardsByCri" resultType="int">
+		<![CDATA[
+			SELECT COUNT(*)
+			FROM board
+		]]>
+		<where>
+			<if test="type == 'subject'.toString()">
+				subject LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="type == 'content'.toString()">
+				content LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="type == 'memberId'.toString()">
+				member_id LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+		</where>
 	</select>
 
 	<!-- ===========insert============== -->

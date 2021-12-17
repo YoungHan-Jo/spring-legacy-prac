@@ -15,6 +15,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.domain.BoardVO;
 import com.example.domain.Criteria;
+import com.example.domain.PageDTO;
 import com.example.service.BoardService;
 
 @Controller
@@ -35,7 +36,14 @@ public class BoardController {
 		
 		List<BoardVO> boardList = boardService.getBoardsByCri(cri);
 		
+		int totalCount = boardService.getCountBoardsByCri(cri);
+		
+		System.out.println("totalCount : " + totalCount);
+		
+		PageDTO pageDTO = new PageDTO(cri, totalCount);
+		
 		model.addAttribute("boardList", boardList);
+		model.addAttribute("pageMaker", pageDTO);
 		
 		return "board/boardList";
 	}
@@ -84,8 +92,10 @@ public class BoardController {
 	}
 
 	@GetMapping("/content")
-	public String boardContent(int num, @RequestParam(required = false, defaultValue = "1") String pageNum,
+	public String boardContent(Criteria cri,int num, @RequestParam(required = false, defaultValue = "1") String pageNum,
 			Model model) {
+		
+		System.out.println("cri : " + cri);
 		
 		// num, pageNum 값 잘 가져왔는지 체크
 		System.out.println("num : " + num);
@@ -102,6 +112,7 @@ public class BoardController {
 		// 프론트로 던질 값 싣기
 		model.addAttribute("board", boardVO);
 		model.addAttribute("pageNum", pageNum);
+		model.addAttribute("cri", cri);
 
 		// board폴더 밑에 boardContent.jsp파일(화면)로 보내기
 		return "board/boardContent";

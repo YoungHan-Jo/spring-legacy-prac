@@ -61,7 +61,7 @@
 			
 			<div>
 				<button type="button" class="btn btn-primary"
-					onclick="location.href='/board/list?pageNum=${ pageNum }'">게시글 목록</button>
+					onclick="location.href='/board/list?pageNum=${ pageNum }&type=${ cri.type }&keyword=${ cri.keyword }'">게시글 목록</button>
 			</div>
 			<!-- Contact Section Form-->
 			<div class="row justify-content-center" id="content-box">

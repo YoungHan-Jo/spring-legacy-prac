@@ -48,4 +48,8 @@ public class BoardService {
 		
 		return boardMapper.getBoardsByCri(cri);
 	}
+	
+	public int getCountBoardsByCri(Criteria cri) {
+		return boardMapper.getCountBoardsByCri(cri);
+	}
 }
