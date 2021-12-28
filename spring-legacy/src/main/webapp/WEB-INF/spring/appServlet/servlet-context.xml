@@ -25,5 +25,26 @@
 	
 	<context:component-scan base-package="com.example.controller" />
 	
+	
+	<!-- 인터셉터 활성화 /**는 모든 경로에 적용 -->
+	<!-- exclude-mapping는 인터셉트 적용을 제외할 경로 -->
+	<interceptors>
+		<interceptor>
+			<mapping path="/**"/>
+			<beans:bean class="com.example.interceptor.RememberMeInterceptor"/>
+		</interceptor>
+		
+		<interceptor>
+			<mapping path="/member/*"/>
+			<mapping path="/board/*"/>
+			<exclude-mapping path="/member/login"/>
+			<exclude-mapping path="/member/join"/>
+			<exclude-mapping path="/board/list"/>
+			<exclude-mapping path="/board/content"/>
+			<beans:bean class="com.example.interceptor.LoginCheckInterceptor"/>
+		</interceptor>
+		
+	</interceptors>
+	
 </beans:beans>
 
