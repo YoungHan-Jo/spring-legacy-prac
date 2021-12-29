@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.AttachMapper">
+	
+	<!-- ===========select============== -->
+	
+
+	<!-- ===========insert============== -->
+	<insert id="addAttaches">
+		<![CDATA[
+			INSERT INTO attach (uuid, uploadpath, filename, filetype, board_num)
+			VALUES
+		]]>
+		<foreach collection="list" item="attach" separator=",">
+			(#{attach.uuid}, #{attach.uploadpath}, #{attach.filename}, #{attach.filetype}, #{attach.boardNum})
+		</foreach>
+	</insert>
+
+	
+	<!-- ===========update============== -->
+	
+	
+	<!-- ===========delete============== -->
+	
+
+
+</mapper>
