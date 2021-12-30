@@ -61,10 +61,37 @@ public class BoardService {
 		// 게시글 DB등록
 		boardMapper.writeBoard(boardVO);
 		// 첨부파일 DB등록
-		//List<AttachVO> attachList = boardVO.getAttachList();
-		//attachMapper.addAttaches(attachList);
-		attachMapper.addAttaches(boardVO.getAttachList());
-		
+		List<AttachVO> attachList = boardVO.getAttachList();
+		// attachList가 null값이 아니고, 크기가 0보다 클 때 실행
+		if(attachList != null && attachList.size() > 0 ) {
+			attachMapper.addAttaches(attachList);			
+		}
 	}
+	
+	public BoardVO getBoardAndAttaches(int num) {
+		return boardMapper.getBoardAndAttaches(num);
+	}
+	
+	public void deleteBoardAndAttaches(int boardNum) {
+		
+		// boardNum에 해당하는 게시글 삭제
+		boardMapper.deleteBoard(boardNum);
+		
+		// boardNum에 해당하는 첨부파일 삭제
+		attachMapper.deleteAttachesByBoardNum(boardNum);
+	}
+	
+	public void updateBoardAndInsertAttachesAndDeleteAttaches(BoardVO boardVO, List<AttachVO> newAttachList,
+			List<String> delUuidList) {
+		if (newAttachList != null && newAttachList.size() > 0) {
+			attachMapper.addAttaches(newAttachList);
+		}
+
+		if (delUuidList != null && delUuidList.size() > 0) {
+			attachMapper.deleteAttachesByUuids(delUuidList);
+		}
+
+		boardMapper.updateBoard(boardVO);
+	} //updateBoardAndInsertAttachesAndDeleteAttaches
 	
 }

@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,6 +63,15 @@
 			<div>
 				<button type="button" class="btn btn-primary"
 					onclick="location.href='/board/list?pageNum=${ pageNum }&type=${ cri.type }&keyword=${ cri.keyword }'">게시글 목록</button>
+					
+				<c:if test="${ id eq board.memberId || id eq 'admin' }">
+					<form action="/board/remove" method="POST">
+						<input type="hidden" name="boardNum" value="${ board.num }">
+						<input type="hidden" name="pageNum" value="${ pageNum }">
+						<button type="submit" class="btn btn-primary">게시글 삭제</button>
+					</form>
+					<button onclick="location.href='/board/modify?boardNum=${ board.num }&pageNum=${ pageNum }'">수정</button>			
+				</c:if>
 			</div>
 			<!-- Contact Section Form-->
 			<div class="row justify-content-center" id="content-box">
@@ -84,6 +94,42 @@
 				</div >
 				<div class="row rows" id="row3">
 				${ board.content }
+				</div>
+				<div class="row rows">
+					<h3>첨부파일</h3>
+					<c:choose>
+						<c:when test="${ fn:length(board.attachList) gt 0 }" >
+							<c:forEach var="attach" items="${ board.attachList }"> 
+
+								<c:if test="${ attach.filetype eq 'O' }">
+									<!-- 일반파일 -->
+									<!-- 다운로드할 일반파일 경로 변수 만들기 pageScope로 저장 -->
+									<c:set var="fileCallPath"
+										value="${ attach.uploadpath }/${ attach.uuid }_${ attach.filename }" />
+									<li>
+										<a href="/download?fileName=${ fileCallPath }">
+											💾 ${ attach.filename }
+										</a>
+									</li>
+								</c:if>
+								<c:if test="${ attach.filetype eq 'I' }">
+									<!-- 이미지파일 -->
+									<c:set var="fileCallPath"
+										value="${ attach.uploadpath }/s_${ attach.uuid }_${ attach.filename }" />
+									<c:set var="fileCallPathOrigin"
+										value="${ attach.uploadpath }/${ attach.uuid }_${ attach.filename }" />
+									<li>
+										<a href="/download?fileName=${ fileCallPathOrigin }"> 
+											💾 ${ attach.filename }<img src="/display?fileName=${ fileCallPath }" style="width: 200px">
+										</a>
+									</li>
+								</c:if>
+							</c:forEach>
+						</c:when>
+						<c:otherwise>
+							첨부파일 없음
+						</c:otherwise>
+					</c:choose>
 				</div>
 			</div>
 		</div>

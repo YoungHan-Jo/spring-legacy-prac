@@ -67,6 +67,46 @@
 			</if>
 		</where>
 	</select>
+	
+	<!-- 새로운 컬럼이 추가되어도 에러가 나지 않도록 컬럼 하나하나 전부 명시해줌 -->
+	<!-- outer join은 attachVO도 있기때문에 담는 방식 resultMap 사용 -->
+	<select id="getBoardAndAttaches" resultMap="boardAndAttaches">
+		<![CDATA[
+			SELECT b.num, b.member_id, b.subject, b.content, b.view_count, b.reg_date, 
+				   b.re_ref, b.re_lev, b.re_seq,
+				   a.uuid, a.uploadpath, a.filename, a.filetype, a.board_num
+			FROM board b
+			LEFT OUTER JOIN attach a
+			ON b.num = a.board_num
+			WHERE b.num = #{num}
+		]]>
+	</select>
+	
+	<resultMap type="boardVO" id="boardAndAttaches">
+		<id column="num" property="num"/>
+		<result column="member_id" property="memberId"/>
+		<result column="subject" property="subject"/>
+		<result column="content" property="content"/>
+		<result column="view_count" property="viewCount"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="re_ref" property="reRef"/>
+		<result column="re_lev" property="reLev"/>
+		<result column="re_seq" property="reSeq"/>
+		<collection property="attachList" javaType="list" ofType="attachVO">
+			<id column="uuid" property="uuid"/>
+			<result column="uploadpath" property="uploadpath"/>
+			<result column="filename" property="filename"/>
+			<result column="filetype" property="filetype"/>
+			<result column="board_num" property="boardNum"/>
+		</collection>
+	<!-- 이 정보 기준으로 데이터를 담음 id로 구분 -->
+	<!-- property는 VO에 set 하는거처럼 낙타표기 -->
+	<!-- 기본키 컬럼은 id태그 -->
+	<!-- 1:1 association 태그 -->
+	<!-- 1:N collection 태그 -->
+	<!-- property의 타입: javaType/ 구성요소타입: ofType -->
+	</resultMap>
+	
 
 	<!-- ===========insert============== -->
 	<insert id="writeBoard">
@@ -89,8 +129,22 @@
 		]]>
 	</update>
 	
+	<update id="updateBoard">
+		<![CDATA[
+			UPDATE board
+			SET subject = #{subject}, content = #{content}
+			WHERE num = #{num}
+		]]>
+	</update>
+	
 	<!-- ===========delete============== -->
 	
+	<delete id="deleteBoard">
+		<![CDATA[
+			DELETE FROM board
+			WHERE num = #{boardNum}
+		]]>
+	</delete>
 
 
 </mapper>

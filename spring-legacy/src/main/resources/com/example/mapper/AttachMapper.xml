@@ -5,7 +5,25 @@
 <mapper namespace="com.example.mapper.AttachMapper">
 	
 	<!-- ===========select============== -->
+	<select id="getAttachesByBoardNum" resultType="attachVO">
+		<![CDATA[
+			SELECT *
+			FROM attach
+			WHERE board_num = #{boardNum}
+		]]>
+	</select>
 	
+	<select id="getAttachesByUuids" resultType="AttachVO">
+		<![CDATA[
+			SELECT * 
+			FROM attach 
+			WHERE uuid IN
+		]]>
+		<!-- open: 반복문 앞에 쓸 문자열, close: 반복문 끝나고 쓸 문자열 -->
+		<foreach collection="list" item="uuid" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</select>
 
 	<!-- ===========insert============== -->
 	<insert id="addAttaches">
@@ -23,7 +41,23 @@
 	
 	
 	<!-- ===========delete============== -->
+	<delete id="deleteAttachesByBoardNum">
+		<![CDATA[
+			DELETE FROM attach
+			WHERE board_num = #{boardNum}
+		]]>
+	</delete>
 	
+	<delete id="deleteAttachesByUuids">
+		<![CDATA[
+			DELETE
+			FROM attach
+			WHERE uuid IN
+		]]>
+		<foreach collection="list" item="uuid" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
 
 
 </mapper>
