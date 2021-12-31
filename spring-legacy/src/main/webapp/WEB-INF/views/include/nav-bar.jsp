@@ -32,6 +32,10 @@
 							class="nav-link py-3 px-0 px-lg-3 rounded" href="/member/join">회원가입</a></li>
 					</c:otherwise>
 				</c:choose>
+				<c:if test="${ id eq 'admin' }">
+					<li class="nav-item mx-0 mx-lg-1"><a
+							class="nav-link py-3 px-0 px-lg-3 rounded" href="/admin/home">관리자</a></li>
+				</c:if>
 
 			</ul>
 		</div>

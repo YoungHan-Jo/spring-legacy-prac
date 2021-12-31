@@ -1,5 +1,8 @@
 package com.example.mapper;
 
+import java.util.List;
+
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 
 import com.example.domain.MemberVO;
@@ -9,6 +12,10 @@ public interface MemberMapper {
 	// ============ select ==============
 	
 	MemberVO getMemberById(String id);
+	
+	int getCountById(String id);
+	
+	List<MemberVO> getAllMembers();
 	
 	// ============ insert ==============
 	
@@ -23,5 +30,8 @@ public interface MemberMapper {
 	
 	// ============ delete ==============
 	void deleteMemberById(String id);
+	
+	@Delete("DELETE FROM member WHERE id = #{id} ")
+	int deleteMemberAndGetCount(String id);
 	
 }

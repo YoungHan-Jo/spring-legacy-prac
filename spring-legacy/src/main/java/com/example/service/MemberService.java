@@ -1,5 +1,7 @@
 package com.example.service;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,5 +38,17 @@ public class MemberService {
 	
 	public void deleteMemberById(String id) {
 		memberMapper.deleteMemberById(id);
+	}
+	
+	public int getCountById(String id) {
+		return memberMapper.getCountById(id);
+	}
+	
+	public List<MemberVO> getAllMembers(){
+		return memberMapper.getAllMembers();
+	}
+	
+	public int deleteMemberAndGetCount(String id) {
+		return memberMapper.deleteMemberAndGetCount(id);
 	}
 }

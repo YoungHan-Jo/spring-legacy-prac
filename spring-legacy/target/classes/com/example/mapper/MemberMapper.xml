@@ -9,7 +9,22 @@
 		<![CDATA[
 			SELECT *
 			FROM member
-			WHERE id = #{id};
+			WHERE id = #{id}
+		]]>
+	</select>
+	
+	<select id="getCountById" resultType="int">
+		<![CDATA[
+			SELECT COUNT(*)
+			FROM member
+			WHERE id = #{id}
+		]]>
+	</select>
+	
+	<select id="getAllMembers" resultType="memberVO">
+		<![CDATA[
+			SELECT *
+			FROM member
 		]]>
 	</select>
 	
@@ -51,6 +66,8 @@
 			WHERE id = #{id}
 		]]>
 	</delete>
+	
+
 	
 
 
